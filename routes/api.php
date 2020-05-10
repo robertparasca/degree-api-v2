@@ -3,17 +3,29 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-/*
-|--------------------------------------------------------------------------
-| API Routes
-|--------------------------------------------------------------------------
-|
-| Here is where you can register API routes for your application. These
-| routes are loaded by the RouteServiceProvider within a group which
-| is assigned the "api" middleware group. Enjoy building your API!
-|
-*/
+Route::middleware(['auth:api'])->group(function () {
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+    Route::get('/me', 'AuthController@me');
+    Route::get('/logout', 'AuthController@logout');
+
+    Route::get('/staff', 'StaffController@index');
+    Route::post('/staff', 'StaffController@store');
+    Route::get('/staff/{id}', 'StaffController@show');
+    Route::put('/staff/{id}', 'StaffController@update');
+    Route::delete('/staff/{id}', 'StaffController@destroy');
+
+    Route::get('/students', 'StudentController@index');
+    Route::get('/students/{id}', 'StudentController@show');
+    Route::put('/students/{id}', 'StudentController@update');
+    Route::delete('/students/{id}', 'StudentController@destroy');
+
+    Route::get('/tickets', 'TicketController@index');
+    Route::post('/tickets', 'TicketController@store');
+    Route::get('/tickets/{id}', 'TicketController@show');
+    Route::put('/tickets/{id}', 'TicketController@update');
+    Route::delete('/tickets/{id}', 'TicketController@destroy');
+    Route::post('/tickets/validate/{id}', 'TicketController@validateTicket');
+    Route::post('/tickets/reject/{id}', 'TicketController@rejectTicket');
 });
+
+Route::post('/login', 'AuthController@login');
