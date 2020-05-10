@@ -8,7 +8,6 @@ use App\Http\Requests\Student\StudentShowRequest;
 use App\Http\Requests\Student\StudentUpdateRequest;
 use App\Student;
 use App\User;
-use Illuminate\Support\Facades\Auth;
 
 class StudentController extends Controller
 {
@@ -18,7 +17,7 @@ class StudentController extends Controller
     }
 
     public function show(StudentShowRequest $request, int $id) {
-        $student = User::where('is_student', true)->where('id', $id)->with('student')->first();
+        $student = User::where('is_student', true)->where('id', $id)->with(['student.scholarships', 'student.tickets'])->first();
         if ($student) {
             return $this->response200($student);
         }
