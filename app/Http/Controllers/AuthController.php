@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\ActivateAccountToken;
+use App\Http\Requests\Auth\ActivateAccountRequest;
 use App\User;
 use Illuminate\Http\Request;
 
@@ -47,8 +49,13 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
+        // && is_account_active
         if (!auth()->attempt($validatedData)) {
             return $this->response422(['message' => 'Invalid credentials']);
+        }
+
+        if (!$request->user()->is_account_active) {
+            return $this->response422(['message' => 'Contul tau nu este activat inca. Verifica email-ul.']);
         }
 
         $user = $this->buildUser($request);
@@ -65,5 +72,30 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
         $request->user()->token()->delete();
         return $this->response200([]);
+    }
+
+    public function activateAccount(ActivateAccountRequest $request) {
+        $data = $request->only(['token', 'password']);
+
+        $line = ActivateAccountToken::where('token', $data['token'])->first();
+
+        if (!$line) {
+            return $this->response401();
+        }
+
+        $user = User::find($line->user_id);
+
+        $user->password = bcrypt($data['password']);
+        $user->is_account_active = true;
+
+        $result = $user->save();
+
+        ActivateAccountToken::destroy($line->id);
+
+        if ($result) {
+            return $this->response200(['Success']);
+        }
+
+        return $this->response401();
     }
 }

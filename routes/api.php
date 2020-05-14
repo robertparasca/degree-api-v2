@@ -3,8 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth:api'])->group(function () {
-
+Route::middleware(['auth:api', 'account_activated'])->group(function () {
     Route::get('/me', 'AuthController@me');
     Route::get('/logout', 'AuthController@logout');
 
@@ -26,6 +25,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('/tickets/{id}', 'TicketController@destroy');
     Route::post('/tickets/validate/{id}', 'TicketController@validateTicket');
     Route::post('/tickets/reject/{id}', 'TicketController@rejectTicket');
+
 });
 
+Route::get('/tickets/pdf/{id}', 'TicketController@generateTicketPDF');
+
 Route::post('/login', 'AuthController@login');
+Route::post('/activate-account', 'AuthController@activateAccount');

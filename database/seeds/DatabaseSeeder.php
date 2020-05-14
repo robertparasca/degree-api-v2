@@ -16,16 +16,19 @@ class DatabaseSeeder extends Seeder
         DB::table('users')->insert([
             'email' => 'parascarobert@gmail.com',
             'password' => Hash::make('asd123'),
-            'is_student' => true
+            'is_student' => true,
+            'is_account_active' => true,
         ]);
         DB::table('users')->insert([
             'email' => 'caprianovidiu@gmail.com',
             'password' => Hash::make('asd123'),
-            'is_student' => true
+            'is_student' => true,
+            'is_account_active' => true,
         ]);
         DB::table('users')->insert([
             'email' => 'staff@gmail.com',
             'password' => Hash::make('asd123'),
+            'is_account_active' => true,
         ]);
 
 

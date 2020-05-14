@@ -2,13 +2,19 @@
 
 namespace App\Http\Controllers;
 
+use App\ActivateAccountToken;
 use App\Http\Requests\Staff\StaffDestroyRequest;
 use App\Http\Requests\Staff\StaffIndexRequest;
 use App\Http\Requests\Staff\StaffStoreRequest;
 use App\Http\Requests\Staff\StaffUpdateRequest;
+use App\Mail\ActivateAccount;
 use App\Staff;
 use App\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class StaffController extends Controller
 {
@@ -27,19 +33,26 @@ class StaffController extends Controller
     }
 
     public function store(StaffStoreRequest $request) {
-        $userData = $request->only(['email', 'password']);
+        $userData = $request->only(['email']);
         $staffData = $request->only([
             'first_name',
             'last_name'
         ]);
 
-        $userData['password'] = bcrypt($userData['password']);
+        $userData['password'] = bcrypt(Str::random(40));
 
         $user = User::create($userData);
 
         $staffData['user_id'] = $user->id;
 
         $staff = Staff::create($staffData);
+
+        $token = ActivateAccountToken::create([
+            'token' => md5(Str::random(40) . microtime(true)),
+            'user_id' => $user->id
+        ]);
+
+        Mail::to($user)->send(new ActivateAccount($user, $token->token));
 
         return $this->response200(['Success']);
     }

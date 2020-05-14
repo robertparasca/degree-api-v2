@@ -20,6 +20,7 @@ class CreateTicketsTable extends Migration
             $table->dateTime('validated_at')->nullable();
             $table->string('rejection_reason')->nullable();
             $table->string('registration_number')->nullable();
+            $table->string('ticket_type')->nullable();
             $table->unsignedBigInteger('validated_by')->nullable();
             $table->unsignedBigInteger('user_id');
 

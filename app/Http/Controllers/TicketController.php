@@ -4,15 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\Ticket\TicketDestroyRequest;
 use App\Http\Requests\Ticket\TicketIndexRequest;
+use App\Http\Requests\Ticket\TicketPdfRequest;
 use App\Http\Requests\Ticket\TicketRejectRequest;
 use App\Http\Requests\Ticket\TicketStoreRequest;
 use App\Http\Requests\Ticket\TicketValidateRequest;
+use App\Institute;
 use App\Ticket;
 use Carbon\Carbon;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use PDF;
+use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class TicketController extends Controller
 {
+
     public function index(TicketIndexRequest $request) {
         if (Auth::user()->is_student) {
             $tickets = Ticket::where('user_id', Auth::user()->id)
@@ -52,13 +59,14 @@ class TicketController extends Controller
     }
 
     public function validateTicket(TicketValidateRequest $request, int $id) {
-        $data = $request->only(['registration_number']);
+        $data = $request->only(['registration_number', 'ticket_type']);
         $ticket = Ticket::find($id);
         if ($ticket->is_validated) {
             return $this->response403();
         }
 
         $ticket->registration_number = $data['registration_number'];
+        $ticket->ticket_type = $data['ticket_type'];
         $ticket->validated_by = Auth::user()->id;
         $ticket->validated_at = Carbon::now();
         $ticket->is_validated = true;
@@ -91,5 +99,25 @@ class TicketController extends Controller
         }
 
         return $this->response422([]);
+    }
+
+    public function generateTicketPDF(TicketPdfRequest $request, int $id) {
+        $ticket = Ticket::find($id)->with(['user.student.scholarships'])->first();
+
+        if (!$ticket->is_validated) {
+            return $this->response401();
+        }
+
+        $institute = Institute::find(1)->first();
+        $viewName = 'pdf.' . $ticket->ticket_type;
+        $pdf = PDF::loadView($viewName, [
+            'ticket' => $ticket,
+            'user' => $ticket->user,
+            'student' => $ticket->user->student,
+            'institute' => $institute
+        ]);
+        $name = 'Ticket1' . Carbon::now()->timestamp . '.pdf';
+
+        return $pdf->download($name);
     }
 }
