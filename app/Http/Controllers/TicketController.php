@@ -9,10 +9,14 @@ use App\Http\Requests\Ticket\TicketRejectRequest;
 use App\Http\Requests\Ticket\TicketStoreRequest;
 use App\Http\Requests\Ticket\TicketValidateRequest;
 use App\Institute;
+use App\Mail\TicketGenerated;
+use App\Mail\TicketRejected;
 use App\Ticket;
+use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use PDF;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -60,7 +64,7 @@ class TicketController extends Controller
 
     public function validateTicket(TicketValidateRequest $request, int $id) {
         $data = $request->only(['registration_number', 'ticket_type']);
-        $ticket = Ticket::find($id);
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student'])->find($id);
         if ($ticket->is_validated) {
             return $this->response403();
         }
@@ -73,6 +77,10 @@ class TicketController extends Controller
 
         $result = $ticket->save();
 
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student'])->find($id);
+
+        Mail::to($ticket->user->email)->send(new TicketGenerated($ticket));
+
         if ($result) {
             return $this->response200(['Success']);
         }
@@ -82,7 +90,7 @@ class TicketController extends Controller
 
     public function rejectTicket(TicketRejectRequest $request, int $id) {
         $data = $request->only(['rejection_reason']);
-        $ticket = Ticket::find($id);
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student'])->find($id);
         if ($ticket->is_validated) {
             return $this->response403();
         }
@@ -93,6 +101,10 @@ class TicketController extends Controller
         $ticket->is_validated = true;
 
         $result = $ticket->save();
+
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student'])->find($id);
+
+        Mail::to($ticket->user->email)->send(new TicketRejected($ticket));
 
         if ($result) {
             return $this->response200(['Success']);
@@ -116,7 +128,7 @@ class TicketController extends Controller
             'student' => $ticket->user->student,
             'institute' => $institute
         ]);
-        $name = 'Ticket1' . Carbon::now()->timestamp . '.pdf';
+        $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
 
         return $pdf->download($name);
     }

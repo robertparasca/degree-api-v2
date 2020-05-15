@@ -16,4 +16,8 @@ class Ticket extends Model
     public function student() {
         return $this->belongsTo(Student::class, 'user_id','user_id');
     }
+
+    public function validatedBy() {
+        return $this->belongsTo(User::class, 'validated_by','id');
+    }
 }

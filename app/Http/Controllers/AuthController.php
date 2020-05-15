@@ -49,7 +49,6 @@ class AuthController extends Controller
             'password' => 'required'
         ]);
 
-        // && is_account_active
         if (!auth()->attempt($validatedData)) {
             return $this->response422(['message' => 'Invalid credentials']);
         }
@@ -57,6 +56,8 @@ class AuthController extends Controller
         if (!$request->user()->is_account_active) {
             return $this->response422(['message' => 'Contul tau nu este activat inca. Verifica email-ul.']);
         }
+
+        // if the institute is not active and the user is student, return error message.
 
         $user = $this->buildUser($request);
 
