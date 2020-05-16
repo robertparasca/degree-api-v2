@@ -15,8 +15,9 @@ class CreateInstitutesTable extends Migration
     {
         Schema::create('institutes', function (Blueprint $table) {
             $table->id();
-            $table->string('university_name');
-            $table->string('faculty_name');
+            $table->dateTime('start_date');
+            $table->dateTime('mid_date');
+            $table->dateTime('end_date');
             $table->string('dean_name');
             $table->string('secretary_name');
             $table->timestamps();

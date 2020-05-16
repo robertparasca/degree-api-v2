@@ -15,17 +15,19 @@ class TicketGenerated extends Mailable
     public $ticket;
     public $student;
     public $validatedBy;
+    public $ticketUrl;
 
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct($ticket)
+    public function __construct($ticket, $ticketUrl = '')
     {
         $this->ticket = $ticket;
         $this->student = $ticket->user;
         $this->validatedBy = $ticket->validatedBy;
+        $this->ticketUrl = $ticketUrl;
     }
 
     /**
@@ -36,5 +38,6 @@ class TicketGenerated extends Mailable
     public function build()
     {
         return $this->view('mails.ticket_generated');
+//                    ->attach($this->ticketUrl);
     }
 }

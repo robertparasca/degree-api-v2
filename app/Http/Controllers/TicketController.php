@@ -12,14 +12,11 @@ use App\Institute;
 use App\Mail\TicketGenerated;
 use App\Mail\TicketRejected;
 use App\Ticket;
-use App\User;
 use Carbon\Carbon;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use PDF;
-use Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 class TicketController extends Controller
 {
@@ -28,13 +25,13 @@ class TicketController extends Controller
         if (Auth::user()->is_student) {
             $tickets = Ticket::where('user_id', Auth::user()->id)
                 ->orderBy('validated_at', 'desc')
-                ->paginate(5);
+                ->paginate(13);
             return $this->response200($tickets);
         }
         $tickets = Ticket::with(['user', 'student'])
             ->orderBy('is_validated')
             ->orderBy('created_at', 'desc')
-            ->paginate(5);
+            ->paginate(13);
         return $this->response200($tickets);
     }
 
@@ -77,7 +74,10 @@ class TicketController extends Controller
 
         $result = $ticket->save();
 
-        $ticket = Ticket::with(['validatedBy.staff', 'user.student'])->find($id);
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student.scholarships'])->find($id);
+
+//        $storageUrl = $this->generateTicketPDFForEmail($ticket);
+//        Mail::to($ticket->user->email)->send(new TicketGenerated($ticket, $storageUrl));
 
         Mail::to($ticket->user->email)->send(new TicketGenerated($ticket));
 
@@ -113,8 +113,8 @@ class TicketController extends Controller
         return $this->response422([]);
     }
 
-    public function generateTicketPDF(TicketPdfRequest $request, int $id) {
-        $ticket = Ticket::find($id)->with(['user.student.scholarships'])->first();
+    public function downloadTicketPDF(TicketPdfRequest $request, int $id) {
+        $ticket = Ticket::with(['user.student.scholarships'])->find($id);
 
         if (!$ticket->is_validated) {
             return $this->response401();
@@ -131,5 +131,23 @@ class TicketController extends Controller
         $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
 
         return $pdf->download($name);
+    }
+
+    public function generateTicketPDFForEmail($ticket) {
+        $institute = Institute::find(1)->first();
+        $viewName = 'pdf.' . $ticket->ticket_type;
+        $pdf = PDF::loadView($viewName, [
+            'ticket' => $ticket,
+            'user' => $ticket->user,
+            'student' => $ticket->user->student,
+            'institute' => $institute
+        ]);
+        $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
+
+        $storageUrl = 'pdfs/' . $name;
+
+        Storage::put($storageUrl, $pdf->output());
+
+        return Storage::url($name);
     }
 }

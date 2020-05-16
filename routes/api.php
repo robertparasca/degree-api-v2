@@ -28,7 +28,7 @@ Route::middleware(['auth:api', 'account_activated'])->group(function () {
 
 });
 
-Route::get('/tickets/pdf/{id}', 'TicketController@generateTicketPDF');
+Route::get('/tickets/pdf/{id}', 'TicketController@downloadTicketPDF');
 
 Route::post('/login', 'AuthController@login');
 Route::post('/activate-account', 'AuthController@activateAccount');

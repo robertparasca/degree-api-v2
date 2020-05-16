@@ -2,12 +2,9 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
-    <title>Activate account</title>
+    <title>Activare cont</title>
 </head>
 <body>
-    <h1>test</h1>
-    {{$token}}
-    Activate your account <a href={{'http://localhost:3001/activate-account?token=' . $token}}>here</a>.
-    <br>
+    <p>Activează-ți contul apăsând pe link <a href={{'http://localhost:3001/activate-account?token=' . $token}}>acesta</a>.</p>
 </body>
 </html>
