@@ -17,6 +17,7 @@ Route::middleware(['auth:api', 'account_activated'])->group(function () {
     Route::get('/students/{id}', 'StudentController@show');
     Route::put('/students/{id}', 'StudentController@update');
     Route::delete('/students/{id}', 'StudentController@destroy');
+    Route::post('/students/import', 'StudentController@import');
 
     Route::get('/tickets', 'TicketController@index');
     Route::post('/tickets', 'TicketController@store');

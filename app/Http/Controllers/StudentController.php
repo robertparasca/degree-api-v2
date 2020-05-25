@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\Student\StudentDestroyRequest;
+use App\Http\Requests\Student\StudentImportRequest;
 use App\Http\Requests\Student\StudentIndexRequest;
 use App\Http\Requests\Student\StudentShowRequest;
 use App\Http\Requests\Student\StudentUpdateRequest;
@@ -51,5 +52,9 @@ class StudentController extends Controller
         }
 
         return $this->response422(['Error']);
+    }
+
+    public function import(StudentImportRequest $request) {
+
     }
 }
