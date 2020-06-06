@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Student;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Auth;
 
 class StudentImportRequest extends FormRequest
 {
@@ -13,7 +14,7 @@ class StudentImportRequest extends FormRequest
      */
     public function authorize()
     {
-        return false;
+        return !Auth::user()->is_student;
     }
 
     /**

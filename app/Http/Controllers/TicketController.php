@@ -117,18 +117,36 @@ class TicketController extends Controller
         $ticket = Ticket::with(['user.student.scholarships'])->find($id);
 
         if (!$ticket->is_validated) {
-            return $this->response401();
+            return $this->response403();
         }
 
         $institute = Institute::find(1)->first();
+        $now = Carbon::now();
+//        $now = $now->subDays(150);
+//        $now = $now->addYear();
+        $startDate = Carbon::parse($institute->start_date);
+        $midDate = Carbon::parse($institute->mid_date);
+        $endDate = Carbon::parse($institute->end_date);
+
+        if ($now->greaterThan($endDate)) {
+            return $this->response403();
+        }
+
+        $isFirstSemester = true;
+        $activeYear = $startDate->year . '/' . $endDate->year;
+        if ($now->greaterThanOrEqualTo($midDate)) {
+            $isFirstSemester = false;
+        }
         $viewName = 'pdf.' . $ticket->ticket_type;
         $pdf = PDF::loadView($viewName, [
             'ticket' => $ticket,
             'user' => $ticket->user,
             'student' => $ticket->user->student,
-            'institute' => $institute
+            'institute' => $institute,
+            'isFirstSemester' => $isFirstSemester,
+            'activeYear' => $activeYear
         ]);
-        $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
+        $name = 'Ticket' . $now->timestamp . '.pdf';
 
         return $pdf->download($name);
     }

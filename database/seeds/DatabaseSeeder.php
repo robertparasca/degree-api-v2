@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -100,10 +101,13 @@ class DatabaseSeeder extends Seeder
 
 
         DB::table('institutes')->insert([
-            'university_name' => 'Universitatea Tehnică "Gheorghe Asachi" Iași',
-            'faculty_name' => 'Facultatea de Automatică și Calculatoare',
+//            'university_name' => 'Universitatea Tehnică "Gheorghe Asachi" Iași',
+//            'faculty_name' => 'Facultatea de Automatică și Calculatoare',
             'dean_name' => 'Popescu Dan',
             'secretary_name' => 'Popescu Ioan',
+            'start_date' => new Carbon('2019-09-26'),
+            'mid_date' => new Carbon('2020-02-16'),
+            'end_date' => new Carbon('2020-07-31'),
         ]);
 
 

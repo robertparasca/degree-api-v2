@@ -42,7 +42,7 @@
             font-size: 14px;
         }
         span {
-            color: black;
+            color: red;
         }
         span.b {
             color: blue;
