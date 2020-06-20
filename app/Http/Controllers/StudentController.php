@@ -9,6 +9,8 @@ use App\Http\Requests\Student\StudentShowRequest;
 use App\Http\Requests\Student\StudentUpdateRequest;
 use App\Student;
 use App\User;
+use Illuminate\Support\Facades\Storage;
+use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 
 class StudentController extends Controller
 {
@@ -55,6 +57,48 @@ class StudentController extends Controller
     }
 
     public function import(StudentImportRequest $request) {
+        $path = Storage::put('import', $request->file('file'));
+        $path = Storage::path($path);
+        $reader = new Xlsx();
+        $spreadsheet = $reader->load($path);
+        $sheet = $spreadsheet->getActiveSheet();
+        $data = $sheet->toArray();
+        $columns = [];
+        foreach ($data as $index => $row) {
+            if ($index === 0) {
+                $columns = $row;
+            } else {
+                $rowData = array_combine($columns, $row);
+                dd($rowData);
+                $studentData = [
+                    "unique_registration_number" => $rowData["Nr.matricol"],
+                    "email" => $rowData["Contact_email"],
+                    "full_name" => $rowData["NUME SI PRENUME"],
+                    "group" => $rowData["GRUPA I"],
+                    "active_year" => $request->input('year'),
+                    "field_of_study" => $rowData["Domeniu studii"],
+                    "program_of_study" => $rowData["GRUPA I"],
+                    "admission_grade" => $rowData["GRUPA I"],
+                    "admission_year" => $rowData["GRUPA I"],
+                    "start_year" => $rowData["GRUPA I"],
+                    "is_paying_tax" => $rowData["GRUPA I"],
+                ];
+                $userData = [
+                    "email" => $rowData["Contact_email"],
+                    "is_student" => true,
+                    "is_account_active" => false,
+                ];
+                $userExists = User::where('email', $rowData["Contact_email"])->first();
 
+                if ($userExists) {
+
+                    return;
+                }
+                $user = User::create($userData);
+                $studentData['user_id'] = $user->id;
+                Student::create($studentData);
+
+            }
+        }
     }
 }
