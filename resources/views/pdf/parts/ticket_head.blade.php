@@ -29,6 +29,7 @@
         .center-table-cell {
             width: 50%;
             text-align: center;
+            font-size: 14px;
         }
         table p {
             margin: 0;

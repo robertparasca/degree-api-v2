@@ -29,8 +29,10 @@ class CreateStudentsTable extends Migration
             $table->string('admission_year')->nullable();
             $table->string('start_year')->nullable();
             $table->boolean('is_paying_tax')->default(false);
-            $table->boolean('is_second_university')->default(false);
             $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('cycle_of_study')->default(0); // 0 - licenta, 1 - master, 2 - doctorat
+            $table->unsignedBigInteger('language')->default(0); // 0 - romana, 1 - engleza
+            $table->boolean('is_ID')->default(false); // 0 - romana, 1 - engleza
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();

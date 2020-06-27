@@ -8,9 +8,12 @@ use App\Http\Requests\Ticket\TicketPdfRequest;
 use App\Http\Requests\Ticket\TicketRejectRequest;
 use App\Http\Requests\Ticket\TicketStoreRequest;
 use App\Http\Requests\Ticket\TicketValidateRequest;
+use App\Http\Requests\Ticket\TicketChartAdminRequest;
+use App\Http\Requests\Ticket\TicketChartStudentRequest;
 use App\Institute;
 use App\Mail\TicketGenerated;
 use App\Mail\TicketRejected;
+use App\Student;
 use App\Ticket;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -138,13 +141,23 @@ class TicketController extends Controller
             $isFirstSemester = false;
         }
         $viewName = 'pdf.' . $ticket->ticket_type;
+        $cycleOfStudy = 'licență';
+        switch ($ticket->user->student->cycle_of_study) {
+            case 1:
+                $cycleOfStudy = 'master';
+                break;
+            case 2:
+                $cycleOfStudy = 'doctorat';
+                break;
+        }
         $pdf = PDF::loadView($viewName, [
             'ticket' => $ticket,
             'user' => $ticket->user,
             'student' => $ticket->user->student,
             'institute' => $institute,
             'isFirstSemester' => $isFirstSemester,
-            'activeYear' => $activeYear
+            'activeYear' => $activeYear,
+            'cycleOfStudy' => $cycleOfStudy
         ]);
         $name = 'Ticket' . $now->timestamp . '.pdf';
 
@@ -168,4 +181,43 @@ class TicketController extends Controller
 
         return Storage::url($name);
     }
+
+    public function chartAdmin(TicketChartAdminRequest $request) {
+        $tickets = Ticket::where('created_at', '>', Carbon::now()->subDays(6))->get()->groupBy(function($item) {
+            return $item->created_at->format('d.m.yy');
+        });
+
+        $acceptedTickets = Ticket::where([
+            ['created_at', '>', Carbon::now()->subDays(6)],
+            ['is_validated', 1]
+        ])->get()->groupBy(function($item) {
+            return $item->created_at->format('d.m.yy');
+        });
+
+        $rejectedTickets = Ticket::where([
+            ['created_at', '>', Carbon::now()->subDays(6)],
+            ['is_validated', 0],
+            ['validated_at', '<>', null]
+        ])->get()->groupBy(function($item) {
+            return $item->created_at->format('d.m.yy');
+        });
+
+        return $this->response200([
+            'tickets' => $tickets,
+            'accepted' => $acceptedTickets,
+            'rejected' => $rejectedTickets
+        ]);
+    }
+
+    public function chartStudent(TicketChartStudentRequest $request) {
+        $tickets = Ticket::where('user_id', Auth::user()->id)->get()->groupBy(function($item) {
+            return $item->created_at->format('d.m.yy');
+        });
+
+        return $this->response200([
+            'tickets' => $tickets
+        ]);
+    }
+
 }
+

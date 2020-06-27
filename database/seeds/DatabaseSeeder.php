@@ -49,7 +49,6 @@ class DatabaseSeeder extends Seeder
             'admission_year' => '2016',
             'start_year' => '2016',
             'is_paying_tax' => false,
-            'is_second_university' => false,
             'user_id' => 1
         ]);
         DB::table('students')->insert([
@@ -67,7 +66,6 @@ class DatabaseSeeder extends Seeder
             'admission_year' => '2016',
             'start_year' => '2016',
             'is_paying_tax' => false,
-            'is_second_university' => false,
             'user_id' => 2
         ]);
 
