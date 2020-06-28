@@ -29,6 +29,8 @@ Route::middleware(['auth:api', 'account_activated'])->group(function () {
     Route::get('/tickets/chart-admin', 'TicketController@chartAdmin');
     Route::get('/tickets/chart-student', 'TicketController@chartStudent');
 
+    Route::post('/scholarships/import', 'ScholarshipController@import');
+
 });
 
 Route::get('/tickets/pdf/{id}', 'TicketController@downloadTicketPDF');

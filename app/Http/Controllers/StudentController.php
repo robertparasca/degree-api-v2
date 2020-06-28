@@ -9,10 +9,10 @@ use App\Http\Requests\Student\StudentIndexRequest;
 use App\Http\Requests\Student\StudentShowRequest;
 use App\Http\Requests\Student\StudentUpdateRequest;
 use App\ImportFilesLog;
-use App\Mail\ActivateAccount;
+use App\Jobs\SendEmail;
 use App\Student;
 use App\User;
-use Illuminate\Support\Facades\Mail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
@@ -20,7 +20,7 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 class StudentController extends Controller
 {
     public function index(StudentIndexRequest $request) {
-        $students = User::where('is_student', true)->with('student')->paginate(5);
+        $students = User::where('is_student', true)->with('student')->paginate(10);
         return $this->response200($students);
     }
 
@@ -135,8 +135,8 @@ class StudentController extends Controller
                         'token' => md5(Str::random(40) . microtime(true)),
                         'user_id' => $user->id
                     ]);
-
-                    Mail::to($user)->send(new ActivateAccount($user, $token->token));
+                    $details = ['user' => $user, 'token' => $token->token];
+                    SendEmail::dispatch($details)->delay(Carbon::now()->addSeconds($index));
                 }
             }
         }
