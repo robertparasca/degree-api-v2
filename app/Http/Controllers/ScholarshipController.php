@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\ImportFilesLog;
 use App\Scholarship;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,7 @@ class ScholarshipController extends Controller
         $sheet = $spreadsheet->getActiveSheet();
         $data = $sheet->toArray();
         $columns = [];
+        Scholarship::truncate();
         foreach ($data as $index => $row) {
             if ($index === 0) {
                 $columns = $row;
@@ -30,5 +32,11 @@ class ScholarshipController extends Controller
                 Scholarship::create($scholarshipData);
             }
         }
+
+
+        ImportFilesLog::create([
+            'type' => 'scholarship_import'
+        ]);
+        return $this->response200(['Success import']);
     }
 }

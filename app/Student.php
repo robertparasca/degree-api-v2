@@ -32,9 +32,9 @@ class Student extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function scholarships()
+    public function scholarship()
     {
-        return $this->hasMany(Student::class, 'unique_registration_number', 'unique_registration_number');
+        return $this->hasOne(Scholarship::class, 'unique_registration_number', 'unique_registration_number');
     }
 
     public function tickets()

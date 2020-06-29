@@ -77,7 +77,7 @@ class TicketController extends Controller
 
         $result = $ticket->save();
 
-        $ticket = Ticket::with(['validatedBy.staff', 'user.student.scholarships'])->find($id);
+        $ticket = Ticket::with(['validatedBy.staff', 'user.student.scholarship'])->find($id);
 
 //        $storageUrl = $this->generateTicketPDFForEmail($ticket);
 //        Mail::to($ticket->user->email)->send(new TicketGenerated($ticket, $storageUrl));
@@ -117,7 +117,7 @@ class TicketController extends Controller
     }
 
     public function downloadTicketPDF(TicketPdfRequest $request, int $id) {
-        $ticket = Ticket::with(['user.student.scholarships'])->find($id);
+        $ticket = Ticket::with(['user.student.scholarship'])->find($id);
 
         if (!$ticket->is_validated) {
             return $this->response403();
@@ -157,7 +157,8 @@ class TicketController extends Controller
             'institute' => $institute,
             'isFirstSemester' => $isFirstSemester,
             'activeYear' => $activeYear,
-            'cycleOfStudy' => $cycleOfStudy
+            'cycleOfStudy' => $cycleOfStudy,
+            'scholarship' => $ticket->user->student->scholarship
         ]);
         $name = 'Ticket' . $now->timestamp . '.pdf';
 

@@ -30,7 +30,7 @@ class CreateStudentsTable extends Migration
             $table->string('start_year')->nullable();
             $table->boolean('is_paying_tax')->default(false);
             $table->unsignedBigInteger('user_id');
-            $table->unsignedBigInteger('cycle_of_study')->default(0); // 0 - licenta, 1 - master, 2 - doctorat
+            $table->unsignedBigInteger('cycle_of_study')->default(1); // 1 - licenta, 2 - master, 3 - doctorat
             $table->unsignedBigInteger('language')->default(0); // 0 - romana, 1 - engleza
             $table->boolean('is_ID')->default(false); // 0 - romana, 1 - engleza
 
