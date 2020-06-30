@@ -11,6 +11,7 @@ use App\Http\Requests\Ticket\TicketValidateRequest;
 use App\Http\Requests\Ticket\TicketChartAdminRequest;
 use App\Http\Requests\Ticket\TicketChartStudentRequest;
 use App\Institute;
+use App\Jobs\SendTicketEmail;
 use App\Mail\TicketGenerated;
 use App\Mail\TicketRejected;
 use App\Student;
@@ -79,10 +80,15 @@ class TicketController extends Controller
 
         $ticket = Ticket::with(['validatedBy.staff', 'user.student.scholarship'])->find($id);
 
-//        $storageUrl = $this->generateTicketPDFForEmail($ticket);
-//        Mail::to($ticket->user->email)->send(new TicketGenerated($ticket, $storageUrl));
+        $storageUrl = $this->generateTicketPDFForEmail($ticket);
 
-        Mail::to($ticket->user->email)->send(new TicketGenerated($ticket));
+        $details = [
+            'user' => $ticket->user->email,
+            'ticket' => $ticket,
+            'storageUrl' => $storageUrl
+        ];
+
+        SendTicketEmail::dispatch($details);
 
         if ($result) {
             return $this->response200(['Success']);
@@ -168,20 +174,45 @@ class TicketController extends Controller
 
     public function generateTicketPDFForEmail($ticket) {
         $institute = Institute::find(1)->first();
+        $validatedAt = Carbon::parse($ticket->validated_at);
+        $isFirstSemester = true;
+        $startDate = Carbon::parse($institute->start_date);
+        $midDate = Carbon::parse($institute->mid_date);
+        $endDate = Carbon::parse($institute->end_date);
+
+        $activeYear = $startDate->year . '/' . $endDate->year;
+
+        if ($validatedAt->greaterThanOrEqualTo($midDate)) {
+            $isFirstSemester = false;
+        }
         $viewName = 'pdf.' . $ticket->ticket_type;
+        $cycleOfStudy = 'licență';
+        switch ($ticket->user->student->cycle_of_study) {
+            case 2:
+                $cycleOfStudy = 'master';
+                break;
+            case 3:
+                $cycleOfStudy = 'doctorat';
+                break;
+        }
+
         $pdf = PDF::loadView($viewName, [
             'ticket' => $ticket,
             'user' => $ticket->user,
             'student' => $ticket->user->student,
-            'institute' => $institute
+            'institute' => $institute,
+            'isFirstSemester' => $isFirstSemester,
+            'activeYear' => $activeYear,
+            'cycleOfStudy' => $cycleOfStudy,
+            'scholarship' => $ticket->user->student->scholarship
         ]);
         $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
 
-        $storageUrl = 'pdfs/' . $name;
+        $storageUrl = 'public/' . $name;
 
         Storage::put($storageUrl, $pdf->output());
 
-        return Storage::url($name);
+        return $storageUrl;
     }
 
     public function chartAdmin(TicketChartAdminRequest $request) {

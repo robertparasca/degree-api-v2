@@ -27,7 +27,7 @@ class DatabaseSeeder extends Seeder
             'is_account_active' => true,
         ]);
         DB::table('users')->insert([
-            'email' => 'staff@gmail.com',
+            'email' => 'popescu.daniel@pradegree.com',
             'password' => Hash::make('asd123'),
             'is_account_active' => true,
         ]);
@@ -69,8 +69,8 @@ class DatabaseSeeder extends Seeder
 
 
         DB::table('staff')->insert([
-            'first_name' => 'Staff',
-            'last_name' => 'Staff',
+            'first_name' => 'Daniel',
+            'last_name' => 'Popescu',
             'user_id' => 3
         ]);
 

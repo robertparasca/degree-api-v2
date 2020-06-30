@@ -37,7 +37,7 @@ class TicketGenerated extends Mailable
      */
     public function build()
     {
-        return $this->view('mails.ticket_generated');
-//                    ->attach($this->ticketUrl);
+        return $this->view('mails.ticket_generated')
+                    ->attachFromStorage($this->ticketUrl);
     }
 }
