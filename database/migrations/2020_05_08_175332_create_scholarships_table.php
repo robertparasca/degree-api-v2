@@ -22,7 +22,7 @@ class CreateScholarshipsTable extends Migration
             $table->date('period_start_date')->nullable();
             $table->date('period_end_date')->nullable();
 
-            $table->foreign('unique_registration_number')->references('unique_registration_number')->on('students');
+            $table->foreign('unique_registration_number')->references('unique_registration_number')->on('students')->onDelete('cascade');
             $table->timestamps();
         });
     }

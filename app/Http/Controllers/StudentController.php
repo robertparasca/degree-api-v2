@@ -20,12 +20,12 @@ use PhpOffice\PhpSpreadsheet\Reader\Xlsx;
 class StudentController extends Controller
 {
     public function index(StudentIndexRequest $request) {
-        $students = User::where('is_student', true)->with('student')->paginate(10);
+        $students = Student::with('user')->orderBy('group')->paginate(10);
         return $this->response200($students);
     }
 
     public function show(StudentShowRequest $request, int $id) {
-        $student = User::where('is_student', true)->where('id', $id)->with(['student.scholarships', 'student.tickets'])->first();
+        $student = User::where('is_student', true)->where('id', $id)->with(['student.scholarship', 'student.tickets'])->first();
         if ($student) {
             return $this->response200($student);
         }
