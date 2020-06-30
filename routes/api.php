@@ -31,6 +31,7 @@ Route::middleware(['auth:api', 'account_activated'])->group(function () {
 
     Route::post('/scholarships/import', 'ScholarshipController@import');
 
+    Route::get('/institute', 'InstituteController@index');
 });
 
 Route::get('/tickets/pdf/{id}', 'TicketController@downloadTicketPDF');

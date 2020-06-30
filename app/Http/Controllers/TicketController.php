@@ -124,29 +124,30 @@ class TicketController extends Controller
         }
 
         $institute = Institute::find(1)->first();
-        $now = Carbon::now();
-//        $now = $now->subDays(150);
-//        $now = $now->addYear();
+        $validatedAt = Carbon::parse($ticket->validated_at);
+//        $validatedAt = $validatedAt->addDays(35);
+//        $validatedAt = $validatedAt->subDays(150);
+//        $validatedAt = $validatedAt->addYear();
         $startDate = Carbon::parse($institute->start_date);
         $midDate = Carbon::parse($institute->mid_date);
         $endDate = Carbon::parse($institute->end_date);
 
-        if ($now->greaterThan($endDate)) {
+        if ($validatedAt->greaterThan($endDate)) {
             return $this->response403();
         }
 
         $isFirstSemester = true;
         $activeYear = $startDate->year . '/' . $endDate->year;
-        if ($now->greaterThanOrEqualTo($midDate)) {
+        if ($validatedAt->greaterThanOrEqualTo($midDate)) {
             $isFirstSemester = false;
         }
         $viewName = 'pdf.' . $ticket->ticket_type;
         $cycleOfStudy = 'licență';
         switch ($ticket->user->student->cycle_of_study) {
-            case 1:
+            case 2:
                 $cycleOfStudy = 'master';
                 break;
-            case 2:
+            case 3:
                 $cycleOfStudy = 'doctorat';
                 break;
         }
@@ -160,7 +161,7 @@ class TicketController extends Controller
             'cycleOfStudy' => $cycleOfStudy,
             'scholarship' => $ticket->user->student->scholarship
         ]);
-        $name = 'Ticket' . $now->timestamp . '.pdf';
+        $name = 'Ticket' . Carbon::now()->timestamp . '.pdf';
 
         return $pdf->download($name);
     }

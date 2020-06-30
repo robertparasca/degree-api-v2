@@ -32,8 +32,6 @@ class DatabaseSeeder extends Seeder
             'is_account_active' => true,
         ]);
 
-
-
         DB::table('students')->insert([
             'first_name' => 'Robert',
             'last_name' => 'Parasca',
@@ -99,8 +97,6 @@ class DatabaseSeeder extends Seeder
 
 
         DB::table('institutes')->insert([
-//            'university_name' => 'Universitatea Tehnică "Gheorghe Asachi" Iași',
-//            'faculty_name' => 'Facultatea de Automatică și Calculatoare',
             'dean_name' => 'Popescu Dan',
             'secretary_name' => 'Popescu Ioan',
             'start_date' => new Carbon('2019-09-26'),
